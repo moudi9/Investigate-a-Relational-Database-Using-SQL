@@ -1,0 +1,71 @@
+/* Question Set #1 */
+/* Question 1 */
+/* Slide 2 */
+/* Query 1 */
+SELECT film_title, category_name, rental_count
+FROM (SELECT f.title film_title, c.name        category_name, COUNT(r.*) over (PARTITION BY f.title ORDER BY c.name) AS rental_count
+      FROM category c
+      JOIN film_category fc
+      ON c.category_id = fc.category_id
+      JOIN film f
+      ON f.film_id = fc.film_id
+      JOIN inventory i
+      ON f.film_id = i.film_id
+      JOIN rental r
+      ON i.inventory_id = r.inventory_id
+      WHERE name in ('Animation', 'Children', 'Classics', 'Comedy', 'Family', 'Music')) t1
+GROUP BY 1, 2, 3
+ORDER BY 2, 1;
+
+
+/* Question Set #1 */
+/* Question 2 */
+/* Slide 3 */
+/* Query 2 */
+SELECT f.title, c.name,  f.rental_duration, 
+             NTILE(4) OVER (ORDER BY f.rental_duration) AS standard_quartile
+FROM category c
+JOIN film_category fc
+ON c.category_id = fc.category_id
+JOIN film f
+ON f.film_id = fc.film_id
+WHERE c.name IN ('Animation', 'Family', 'Classics', 'Comedy', 'Music', 'Children')
+ORDER BY 3
+
+
+
+/* Question Set #1 */
+/* Question 3 */
+/* Slide 4 */
+/* Query 3 */
+SELECT category_name,  standard_quartiles,
+              COUNT(category_name)
+FROM (SELECT
+            c.name category_name,
+            NTILE(4) OVER (ORDER BY f.rental_duration) AS standard_quartiles
+      FROM film f
+      JOIN film_category fc
+      ON f.film_id = fc.film_id
+      JOIN category c
+      ON c.category_id = fc.category_id
+      WHERE c.name IN ('Animation', 'Children', 'Classics', 'Comedy', 'Family', 'Music')) t1
+GROUP BY 1, 2
+ORDER BY 1, 2;
+
+
+
+/* Question Set #1 */
+/* Question 1 */
+/* Slide 5 */
+/* Query 4 */
+SELECT DATE_PART('month',r.rental_date) Rental_month, 
+              DATE_PART('year',r.rental_date) Rental_year,
+              s.store_id, 
+             COUNT(*) count_rentals
+FROM rental r
+JOIN staff st
+ON r.staff_id = st.staff_id
+JOIN store s
+ON s.store_id = st.store_id
+GROUP BY 1, 2, 3
+ORDER BY 4 DESC;
